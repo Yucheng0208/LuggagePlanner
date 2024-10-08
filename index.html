@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Prep Checklist / 出差準備清單</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0f7fa;
+            color: #004d40;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #00796b;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        section {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        label, input, button, table {
+            width: 100%;
+            max-width: 600px;
+            margin: 1rem auto;
+            display: block;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        table, th, td {
+            border: 1px solid #004d40;
+        }
+
+        th, td {
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        /* 修正 RWD 問題 */
+        @media (min-width: 768px) {
+            label, input, button, table {
+                width: 80%;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            label, input, button, table {
+                width: 60%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Travel Prep Checklist / 出差準備清單</h1>
+        <button onclick="toggleLanguage()">切換語言 / Toggle Language</button>
+    </header>
+    <section>
+        <label for="upload-txt" id="label-upload">Upload your items list (.txt) / 上傳你的物品清單 (.txt):</label>
+        <input type="file" id="upload-txt" accept=".txt">
+        <button id="add-item-btn">Add New Item / 新增物品</button>
+        <table id="items-table">
+            <thead>
+                <tr>
+                    <th id="header-item">Item / 物品</th>
+                    <th id="header-checked">Checked / 已檢查</th>
+                    <th id="header-quantity">Quantity / 數量</th>
+                    <th id="header-date">Buy Date / 購買日期</th>
+                    <th id="header-remarks">Remarks / 備註</th>
+                    <th id="header-delete">Delete / 刪除</th>
+                </tr>
+            </thead>
+            <tbody id="items-list"></tbody>
+        </table>
+        <button id="export-btn">Export to Word / 匯出成Word文件</button>
+    </section>
+
+    <script>
+        let currentLanguage = 'en'; // 初始語言設定
+
+        document.getElementById('upload-txt').addEventListener('change', handleFileUpload);
+        document.getElementById('add-item-btn').addEventListener('click', addNewItem);
+        document.getElementById('export-btn').addEventListener('click', exportToWord);
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const lines = e.target.result.split('\n');
+                    lines.forEach(line => addItemToTable(line.trim()));
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function addItemToTable(itemText) {
+            const tbody = document.getElementById('items-list');
+            const tr = document.createElement('tr');
+
+            const itemCell = document.createElement('td');
+            itemCell.textContent = itemText;
+            tr.appendChild(itemCell);
+
+            const checkboxCell = document.createElement('td');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.addEventListener('change', (e) => toggleStrikeThrough(e, tr));
+            checkboxCell.appendChild(checkbox);
+            tr.appendChild(checkboxCell);
+
+            const quantityCell = document.createElement('td');
+            const quantityInput = document.createElement('input');
+            quantityInput.type = 'number';
+            quantityInput.min = '1';
+            quantityCell.appendChild(quantityInput);
+            tr.appendChild(quantityCell);
+
+            const dateCell = document.createElement('td');
+            const dateInput = document.createElement('input');
+            dateInput.type = 'date';
+            dateCell.appendChild(dateInput);
+            tr.appendChild(dateCell);
+
+            const remarkCell = document.createElement('td');
+            const remarkInput = document.createElement('input');
+            remarkInput.type = 'text';
+            remarkCell.appendChild(remarkInput);
+            tr.appendChild(remarkCell);
+
+            const deleteCell = document.createElement('td');
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete / 刪除';
+            deleteBtn.addEventListener('click', () => deleteItem(tr));
+            deleteCell.appendChild(deleteBtn);
+            tr.appendChild(deleteCell);
+
+            tbody.appendChild(tr);
+        }
+
+        function addNewItem() {
+            const newItemText = prompt(currentLanguage === 'en' ? 'Enter new item:' : '請輸入新物品:');
+            if (newItemText) {
+                addItemToTable(newItemText);
+            }
+        }
+
+        function toggleStrikeThrough(event, row) {
+            if (event.target.checked) {
+                row.style.textDecoration = 'line-through';
+            } else {
+                row.style.textDecoration = 'none';
+            }
+        }
+
+        function deleteItem(row) {
+            row.remove();
+        }
+
+        function exportToWord() {
+            // 匯出成Word文件功能，這裡可以使用 jsPDF 或 docx.js 來實作
+            alert(currentLanguage === 'en' ? 'This feature will export the list to a Word file.' : '此功能將匯出清單為Word文件。');
+        }
+
+        // 語言切換功能
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+            if (currentLanguage === 'en') {
+                document.getElementById('label-upload').textContent = 'Upload your items list (.txt):';
+                document.getElementById('add-item-btn').textContent = 'Add New Item';
+                document.getElementById('export-btn').textContent = 'Export to Word';
+                document.getElementById('header-item').textContent = 'Item';
+                document.getElementById('header-checked').textContent = 'Checked';
+                document.getElementById('header-quantity').textContent = 'Quantity';
+                document.getElementById('header-date').textContent = 'Buy Date';
+                document.getElementById('header-remarks').textContent = 'Remarks';
+                document.getElementById('header-delete').textContent = 'Delete';
+            } else {
+                document.getElementById('label-upload').textContent = '上傳你的物品清單 (.txt):';
+                document.getElementById('add-item-btn').textContent = '新增物品';
+                document.getElementById('export-btn').textContent = '匯出成Word文件';
+                document.getElementById('header-item').textContent = '物品';
+                document.getElementById('header-checked').textContent = '已檢查';
+                document.getElementById('header-quantity').textContent = '數量';
+                document.getElementById('header-date').textContent = '購買日期';
+                document.getElementById('header-remarks').textContent = '備註';
+                document.getElementById('header-delete').textContent = '刪除';
+            }
+        }
+    </script>
+</body>
+</html>
